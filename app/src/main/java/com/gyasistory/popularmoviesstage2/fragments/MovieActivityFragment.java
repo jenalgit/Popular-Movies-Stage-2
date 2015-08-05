@@ -160,6 +160,7 @@ public class MovieActivityFragment extends Fragment implements AdapterView.OnIte
             mMovieList = (ArrayList<Movie>) getArguments().getSerializable(MOVIE_LIST);
             CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), mMovieList);
             mMainGrid.setAdapter(adapter);
+            mMai
         }
 
 
