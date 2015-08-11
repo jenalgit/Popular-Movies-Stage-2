@@ -3,7 +3,8 @@
 
     <string-array name="org_values">
         <item>popular</item>
-        <item >rated</item>
+        <item>rated</item>
+        <item>favorite</item>
     </string-array>
 
 </resources>

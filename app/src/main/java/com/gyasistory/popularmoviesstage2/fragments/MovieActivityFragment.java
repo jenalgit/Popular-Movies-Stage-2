@@ -1,12 +1,7 @@
 package com.gyasistory.popularmoviesstage2.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,23 +15,11 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.gyasistory.popularmoviesstage2.Movie;
-import com.gyasistory.popularmoviesstage2.NetworkConnections;
-import com.gyasistory.popularmoviesstage2.PasscodeString;
+import com.gyasistory.popularmoviesstage2.data.Movie;
 import com.gyasistory.popularmoviesstage2.R;
 import com.squareup.picasso.Picasso;
 
-import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -160,7 +143,7 @@ public class MovieActivityFragment extends Fragment implements AdapterView.OnIte
             mMovieList = (ArrayList<Movie>) getArguments().getSerializable(MOVIE_LIST);
             CustomGridAdapter adapter = new CustomGridAdapter(getActivity(), mMovieList);
             mMainGrid.setAdapter(adapter);
-            mMai
+            mMainGrid.setOnItemClickListener(this);
         }
 
 

@@ -18,7 +18,7 @@
             android:id="@+id/fragmentGridListContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight=".25"
+            android:layout_weight=".33"
             android:minWidth="200dp"
             tools:layout="@layout/fragment_movie" />
 
@@ -26,7 +26,7 @@
             android:id="@+id/fragmentDetailContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight=".75"
+            android:layout_weight=".67"
             tools:layout="@layout/fragment_movie_detail" />
     </LinearLayout>
 </LinearLayout>

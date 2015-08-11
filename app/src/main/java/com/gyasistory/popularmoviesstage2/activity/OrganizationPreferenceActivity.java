@@ -19,4 +19,6 @@ public class OrganizationPreferenceActivity extends ActionBarActivity {
         getFragmentManager().beginTransaction().replace(R.id.org_frame,
                 new OrganizationPreferenceFragment()).commit();
     }
+
+
 }

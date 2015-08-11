@@ -10,5 +10,12 @@
             android:defaultValue="popular"/>
 
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Data Management">
+        <Preference
+            android:key="DELETE_DATA"
+            android:title="Delete Data"
+            android:summary="Click to delete your data."/>
+    </PreferenceCategory>
 
 </PreferenceScreen>

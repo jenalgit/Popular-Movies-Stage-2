@@ -19,6 +19,14 @@
     <string name="sorted_by_voted">Sorted by Top Voted</string>
     <string-array name="org_entries">
         <item>By Most Popular</item>
-        <item>By highest-Ra</item>
+        <item>By highest-Rated</item>
+        <item>Saved As Favorite</item>
     </string-array>
+    <string name="title_activity_movie_detail">MovieDetailActivity</string>
+    <string name="review_status_text">No Reviews</string>
+    <string name="trailer_status_text">No Trailers</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_database">"DatabaseDelete "</string>
+    <string name="delete_database_text">Click Ok if you would like to delete your Favorites Stored</string>
 </resources>

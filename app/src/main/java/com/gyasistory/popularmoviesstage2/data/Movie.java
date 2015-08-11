@@ -1,4 +1,4 @@
-package com.gyasistory.popularmoviesstage2;
+package com.gyasistory.popularmoviesstage2.data;
 
 import java.io.Serializable;
 
@@ -15,12 +15,13 @@ public class Movie implements Serializable {
     private String poster_path;
     private double popularity;
     private String title;
-    private  int vote_average;
+    private int vote_average;
     private int vote_count;
 
     public int getVote_count() {
         return vote_count;
     }
+
     public void setVote_count(int vote_count) {
         this.vote_count = vote_count;
     }
@@ -28,6 +29,7 @@ public class Movie implements Serializable {
     public int getVote_average() {
         return vote_average;
     }
+
     public void setVote_average(int vote_average) {
         this.vote_average = vote_average;
     }
@@ -94,5 +96,10 @@ public class Movie implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public String toString() {
+        return getOriginal_title();
     }
 }

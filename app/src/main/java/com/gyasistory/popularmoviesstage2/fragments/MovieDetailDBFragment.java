@@ -1,30 +1,28 @@
 package com.gyasistory.popularmoviesstage2.fragments;
 
-
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
+import com.gyasistory.popularmoviesstage2.ApplicationStrings;
 import com.gyasistory.popularmoviesstage2.PasscodeString;
-import com.gyasistory.popularmoviesstage2.data.Movie;
 import com.gyasistory.popularmoviesstage2.R;
 import com.gyasistory.popularmoviesstage2.data.MovieDBOpenHelper;
 import com.gyasistory.popularmoviesstage2.data.MovieProvider;
@@ -44,145 +42,80 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link MovieDetailFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Created by gyasistory on 8/8/15.
  */
-public class MovieDetailFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class MovieDetailDBFragment extends Fragment implements AdapterView.OnItemClickListener{
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String MOVIE_ARG_PARAM = "param1";
-    private static final String REVIEW_ARRAY_LIST = "review_array_list";
-    private static final String TRAILER_ARRAY_LIST = "trailer_array_list";
-    private static final String TAG = "MovieDetailFragment";
+    private static final String TAG = "MovieDetailDBFragment";
+    // Global (Member) Cursor Variable
+    Cursor mCursor;
+    private ArrayList<Trailer> trailerArrayList;
+    private ArrayList<Review> reviewArrayList;
 
+    private ShareActionProvider mShareActionProvider;
 
-    private Movie mMovie;
+    public static MovieDetailDBFragment newInstance(int movie_id) {
+        MovieDetailDBFragment fragment = new MovieDetailDBFragment();
 
-
-    ArrayList<Review> reviewArrayList;
-    ArrayList<Trailer> trailerArrayList;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param _movie This is the movie passed from the List
-     * @return A new instance of fragment MovieDetailFragment.
-     */
-    public static MovieDetailFragment newInstance(Movie _movie) {
-        MovieDetailFragment fragment = new MovieDetailFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(MOVIE_ARG_PARAM, _movie);
-        fragment.setArguments(args);
+        Bundle arg = new Bundle();
+        arg.putInt(ApplicationStrings.MOVIE_DB_EXTRA, movie_id);
+        fragment.setArguments(arg);
         return fragment;
     }
 
-    public MovieDetailFragment() {
-        // Required empty public constructor
-    }
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mMovie = (Movie) getArguments().getSerializable(MOVIE_ARG_PARAM);
-
-        } else if (savedInstanceState.getSerializable(MOVIE_ARG_PARAM) != null) {
-            mMovie = (Movie) savedInstanceState.getSerializable(MOVIE_ARG_PARAM);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+       super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.fragment_movie_detail, container, false);
     }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        setHasOptionsMenu(true);
 
-    }
+        Bundle loadArgs = getArguments();
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mMovie != null && getActivity().findViewById(R.id.detail_image) != null) {
-            ((TextView) getActivity().findViewById(R.id.detail_title)).setText(mMovie.getTitle());
-            Picasso.with(getActivity()).load("https://image.tmdb.org/t/p/w185" + mMovie.getPoster_path())
-                    .placeholder(R.drawable.poster_place_holder)
-                    .into((ImageView) getActivity().findViewById(R.id.detail_image));
-            ((TextView) getActivity().findViewById(R.id.detail_release_date)).setText(mMovie.getRelease_date());
-            ((TextView) getActivity().findViewById(R.id.detail_popularity)).setText("Popularity\n" + mMovie.getPopularity());
-            ((TextView) getActivity().findViewById(R.id.detail_vote_count)).setText("Vote Count: " + mMovie.getVote_count());
-            ((TextView) getActivity().findViewById(R.id.detail_vote_average)).setText("vote Average" + mMovie.getVote_average());
-            ((TextView) getActivity().findViewById(R.id.detail_overview)).setText(mMovie.getOverview());
 
-            // Seing if Movie has already been saved
-            Uri uri = Uri.parse(MovieProvider.CONTENT_URI + "/" + mMovie.getId());
+        if (loadArgs != null && getActivity().findViewById(R.id.detail_image)!=null){
+            int movieIDRetreived = loadArgs.getInt(ApplicationStrings.MOVIE_DB_EXTRA);
+            Uri uri = Uri.parse(MovieProvider.CONTENT_URI + "/" + movieIDRetreived);
             String movieFilter = MovieDBOpenHelper.MOVIE_ID + "=" + uri.getLastPathSegment();
+            Log.d(TAG, "Uri: " + uri.toString());
 
+            mCursor = getActivity().getContentResolver().query(uri, MovieDBOpenHelper.ALL_COLUMNS,
+                    movieFilter, null, null, null);
+            if (mCursor.getCount() > 0) {
+                mCursor.moveToFirst();
 
-            Cursor cursor = getActivity().getContentResolver().query(uri,
-                    MovieDBOpenHelper.ALL_COLUMNS, movieFilter, null, null, null);
-
-
-            if (cursor.getCount() == 0) {
-                getActivity().findViewById(R.id.favorite_button).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        builder.setMessage("Would you like to add " + mMovie.getTitle() + " to your Favorites");
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ContentValues values = new ContentValues();
-                                values.put(MovieDBOpenHelper.BACKDROP_PATH, mMovie.getBackdrop_path());
-                                values.put(MovieDBOpenHelper.MOVIE_ID, mMovie.getId());
-                                values.put(MovieDBOpenHelper.TITLE, mMovie.getTitle());
-                                values.put(MovieDBOpenHelper.POSTER_PATH, mMovie.getPoster_path());
-                                values.put(MovieDBOpenHelper.RELEASE_DATE, mMovie.getRelease_date());
-                                values.put(MovieDBOpenHelper.POPULARITY, mMovie.getPopularity());
-                                values.put(MovieDBOpenHelper.VOTE_COUNT, mMovie.getVote_count());
-                                values.put(MovieDBOpenHelper.VOTE_AVERAGE, mMovie.getVote_average());
-                                getActivity().getContentResolver().insert(MovieProvider.CONTENT_URI, values);
-                                getActivity().findViewById(R.id.favorite_button).setVisibility(View.GONE);
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", null);
-                        builder.show();
-
-
-                    }
-                });
-            } else {
+                ((TextView) getActivity().findViewById(R.id.detail_title)).setText(mCursor.
+                        getString(mCursor.getColumnIndex(MovieDBOpenHelper.TITLE)));
+                Picasso.with(getActivity()).load("https://image.tmdb.org/t/p/w185" + mCursor.
+                        getString(mCursor.getColumnIndex(MovieDBOpenHelper.POSTER_PATH)))
+                        .placeholder(R.drawable.poster_place_holder)
+                        .into((ImageView) getActivity().findViewById(R.id.detail_image));
+                ((TextView) getActivity().findViewById(R.id.detail_release_date)).setText(mCursor.
+                        getString(mCursor.getColumnIndex(MovieDBOpenHelper.RELEASE_DATE)));
+                ((TextView) getActivity().findViewById(R.id.detail_popularity)).setText("Popularity\n" + mCursor.
+                        getDouble(mCursor.getColumnIndex(MovieDBOpenHelper.POPULARITY)));
+                ((TextView) getActivity().findViewById(R.id.detail_vote_count)).setText("Vote Count: " + mCursor.
+                        getInt(mCursor.getColumnIndex(MovieDBOpenHelper.VOTE_COUNT)));
+                ((TextView) getActivity().findViewById(R.id.detail_vote_average)).setText("vote Average" + mCursor.
+                        getString(mCursor.getColumnIndex(MovieDBOpenHelper.VOTE_AVERAGE)));
+                ((TextView) getActivity().findViewById(R.id.detail_overview)).setText(mCursor.
+                        getString(mCursor.getColumnIndex(MovieDBOpenHelper.OVERVIEW)));
                 getActivity().findViewById(R.id.favorite_button).setVisibility(View.GONE);
+
+                new reviewAndTrailerSync().execute(mCursor.getInt(mCursor.getColumnIndex(MovieDBOpenHelper.MOVIE_ID)));
+
             }
-            if (reviewArrayList == null || trailerArrayList == null) {
-                new reviewAndTrailerSync().execute(mMovie.getId());
-            } else {
-                setAdapters();
-            }
+
+
         }
     }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-
-        outState.putSerializable(MOVIE_ARG_PARAM, mMovie);
-        outState.putSerializable(REVIEW_ARRAY_LIST, reviewArrayList);
-        outState.putSerializable(TRAILER_ARRAY_LIST, trailerArrayList);
-        super.onSaveInstanceState(outState);
-    }
-
 
     /**
      * Callback method to be invoked when an item in this AdapterView has
@@ -199,14 +132,13 @@ public class MovieDetailFragment extends Fragment implements AdapterView.OnItemC
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Trailer clickedTrailer = (Trailer) parent.getAdapter().getItem(position);
         intent.setData(Uri.parse("https://www.youtube.com/watch?v=" + clickedTrailer.getKey()));
         Log.d("MovieActivty-", "https://www.youtube.com/watch?v=" + clickedTrailer.getKey());
         startActivity(intent);
-
     }
+
 
     public class reviewAndTrailerSync extends AsyncTask<Integer, Void, Void> {
 
@@ -287,7 +219,7 @@ public class MovieDetailFragment extends Fragment implements AdapterView.OnItemC
             ArrayAdapter<Trailer> adapter = new ArrayAdapter<>(getActivity(),
                     android.R.layout.simple_list_item_1, trailerArrayList);
             listView.setAdapter(adapter);
-            listView.setOnItemClickListener(MovieDetailFragment.this);
+            listView.setOnItemClickListener(MovieDetailDBFragment.this);
         }
 
         if (reviewArrayList.size() > 0) {
@@ -333,4 +265,6 @@ public class MovieDetailFragment extends Fragment implements AdapterView.OnItemC
 
         return result;
     }
+
+
 }
